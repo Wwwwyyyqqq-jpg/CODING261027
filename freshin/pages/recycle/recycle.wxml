@@ -1,0 +1,16 @@
+<!-- 回收站：支撑页（3 天保留 / 恢复 / 彻底删除），不在最短路径内 -->
+<view class="page">
+  <view class="tip">删除的宝贝会在这里躺 3 天，到期自动清理</view>
+
+  <view class="card item" wx:for="{{list}}" wx:key="id">
+    <view class="i-title">{{item.title}}</view>
+    <view class="i-summary">{{item.summary}}</view>
+    <view class="i-meta">{{item.deletedAt}} · <text class="remain">{{item.remain}}</text>后永久删除</view>
+    <view class="i-actions">
+      <view class="a-restore" bindtap="restore" data-id="{{item.id}}">恢复</view>
+      <view class="a-destroy" bindtap="destroy" data-id="{{item.id}}">彻底删除</view>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{list.length === 0}}">回收站是空的</view>
+</view>

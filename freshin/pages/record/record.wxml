@@ -1,0 +1,30 @@
+<!-- 记录页：最短路径第 2 步（标题 + 内容 + 9图 + 1视频） -->
+<view class="page">
+  <view class="card field">
+    <input class="title-input" placeholder="输入标题" placeholder-class="ph" maxlength="20"
+      value="{{title}}" bindinput="onTitle" />
+  </view>
+
+  <view class="card field">
+    <textarea class="content-input" placeholder="输入内容" placeholder-class="ph" maxlength="500"
+      value="{{text}}" bindinput="onText"></textarea>
+    <view class="counter">{{text.length}}/500 · 至少 10 字</view>
+  </view>
+
+  <view class="label">照片（最多 9 张）</view>
+  <view class="grid">
+    <view class="cell" wx:for="{{photos}}" wx:key="index" style="background: {{item.bg}}">
+      <text>{{item.emoji}}</text>
+    </view>
+    <view class="cell add" wx:if="{{photos.length < 9}}" bindtap="addPhoto">＋</view>
+  </view>
+
+  <view class="label">视频（最多 1 个，≤1 分钟且 ≤200MB）</view>
+  <view class="video-cell" wx:if="{{video}}" style="background: {{video.bg}}">
+    <text class="v-emoji">{{video.emoji}}</text>
+    <view class="v-duration">▶ {{video.duration}}</view>
+  </view>
+  <view class="video-add" wx:else bindtap="addVideo">＋ 添加视频</view>
+
+  <view class="save-btn btn-primary" bindtap="save">保存</view>
+</view>

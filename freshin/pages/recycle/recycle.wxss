@@ -1,0 +1,69 @@
+.tip {
+  margin: 8rpx 8rpx 24rpx;
+  font-size: 24rpx;
+  color: #8A8580;
+}
+
+.item {
+  margin-bottom: 24rpx;
+}
+
+.i-title {
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.i-summary {
+  margin-top: 10rpx;
+  color: #6B6660;
+  font-size: 26rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.i-meta {
+  margin-top: 16rpx;
+  font-size: 22rpx;
+  color: #B9B1A9;
+}
+
+.remain {
+  color: #FF6E7A;
+}
+
+.i-actions {
+  margin-top: 24rpx;
+  display: flex;
+  gap: 20rpx;
+}
+
+.a-restore {
+  flex: 1;
+  height: 76rpx;
+  line-height: 76rpx;
+  text-align: center;
+  border-radius: 38rpx;
+  background: linear-gradient(135deg, #FF9A6B 0%, #FF6E7A 100%);
+  color: #FFFFFF;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.a-destroy {
+  flex: 1;
+  height: 76rpx;
+  line-height: 76rpx;
+  text-align: center;
+  border-radius: 38rpx;
+  background: #FFFFFF;
+  color: #8A8580;
+  font-size: 28rpx;
+}
+
+.empty {
+  margin-top: 120rpx;
+  text-align: center;
+  color: #B9B1A9;
+  font-size: 26rpx;
+}

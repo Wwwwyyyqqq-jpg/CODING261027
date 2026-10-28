@@ -1,0 +1,16 @@
+<!-- 首屏：最短路径第 1 步 -->
+<view class="page">
+  <view class="entry-row">
+    <text class="nav-entry" bindtap="goTreasure">宝藏库 ›</text>
+  </view>
+
+  <view class="hero">
+    <view class="hero-emoji">🌿</view>
+    <view class="hero-slogan">记录每一个美好</view>
+    <view class="hero-sub">每次开心，都值得被留下来</view>
+  </view>
+
+  <view class="footer">
+    <view class="record-btn" bindtap="goRecord">记录</view>
+  </view>
+</view>

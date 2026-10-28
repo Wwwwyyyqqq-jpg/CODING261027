@@ -1,0 +1,24 @@
+<!-- 宝藏库：最短路径第 3 步（保存后跳转，按时间从新到旧） -->
+<view class="page">
+  <view class="toolbar">
+    <view class="again btn-primary" bindtap="goRecord">＋ 再记一条</view>
+    <view class="more" bindtap="onMenu">···</view>
+  </view>
+
+  <view class="card record-card" wx:for="{{list}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+    <view class="r-time">{{item.timeLabel}} · {{item.createdAt}}</view>
+    <view class="r-title">{{item.title}}</view>
+    <view class="r-text">{{item.text}}</view>
+    <view class="r-media" wx:if="{{item.thumbs.length > 0 || item.video}}">
+      <view class="thumb" wx:for="{{item.thumbs}}" wx:for-item="p" wx:key="index" style="background: {{p.bg}}">
+        <text>{{p.emoji}}</text>
+      </view>
+      <view class="thumb video-badge" wx:if="{{item.video}}" style="background: {{item.video.bg}}">
+        <text>{{item.video.emoji}}</text>
+        <view class="v-dur">▶ {{item.video.duration}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="end">到底啦，你的宝藏真多 ✨</view>
+</view>

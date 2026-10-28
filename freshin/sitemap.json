@@ -1,0 +1,4 @@
+{
+  "desc": "发现freshin 静态原型",
+  "rules": [{ "action": "allow", "page": "*" }]
+}

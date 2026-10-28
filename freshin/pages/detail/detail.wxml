@@ -1,0 +1,20 @@
+<!-- 详情页：支撑页（回看 + 删除入口），不在最短路径内 -->
+<view class="page">
+  <view class="toolbar">
+    <view class="more" bindtap="onMenu">···</view>
+  </view>
+
+  <view class="d-title">{{record.title}}</view>
+  <view class="d-time">{{record.createdAt}}</view>
+  <view class="d-text">{{record.text}}</view>
+
+  <view class="d-media">
+    <view class="media-cell" wx:for="{{record.photos}}" wx:key="index" style="background: {{item.bg}}">
+      <text>{{item.emoji}}</text>
+    </view>
+    <view class="media-cell video" wx:if="{{record.video}}" style="background: {{record.video.bg}}">
+      <text>{{record.video.emoji}}</text>
+      <view class="v-play">▶ 播放 {{record.video.duration}}</view>
+    </view>
+  </view>
+</view>

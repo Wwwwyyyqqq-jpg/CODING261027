@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>发现freshin · 可点击原型 Demo</title>
+<style>
+  :root {
+    --bg: #FFF9F0;
+    --ink: #3D3A38;
+    --sub: #A29A93;
+    --muted: #B9B1A9;
+    --coral1: #FF9A6B;
+    --coral2: #FF6E7A;
+    --card: #FFFFFF;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(160deg, #FFF6EC 0%, #FFE9E3 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    color: var(--ink);
+  }
+  .stage { display: flex; flex-direction: column; align-items: center; padding: 28px 16px 40px; }
+  .stage-head { text-align: center; margin-bottom: 20px; }
+  .stage-head .logo { font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+  .stage-head .sub { margin-top: 6px; font-size: 13px; color: var(--sub); }
+
+  /* ===== 手机外观 ===== */
+  .phone {
+    width: 375px; height: min(760px, 88vh);
+    background: var(--bg);
+    border: 10px solid #1F1F1F; border-radius: 44px;
+    overflow: hidden; position: relative;
+    display: flex; flex-direction: column;
+    box-shadow: 0 30px 60px rgba(61, 58, 56, .18);
+  }
+  .statusbar {
+    height: 34px; flex: none;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 22px; font-size: 12px; font-weight: 600; color: var(--ink);
+  }
+  .sb-right { letter-spacing: 1px; font-size: 11px; }
+  .navbar {
+    height: 44px; flex: none; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    border-bottom: 1px solid rgba(61,58,56,.05);
+    background: var(--bg);
+  }
+  .nav-title { font-size: 16px; font-weight: 600; }
+  .nav-back {
+    position: absolute; left: 10px; top: 0; height: 44px;
+    display: flex; align-items: center; padding: 0 12px 0 6px;
+    font-size: 26px; color: var(--ink); cursor: pointer; user-select: none;
+  }
+  .nav-back.hidden { visibility: hidden; }
+  .capsule {
+    position: absolute; right: 10px; top: 8px;
+    width: 84px; height: 28px; border-radius: 14px;
+    border: 1px solid rgba(61,58,56,.15);
+    display: flex; align-items: center; justify-content: space-evenly;
+    font-size: 10px; color: var(--sub); background: rgba(255,255,255,.6);
+  }
+  .capsule i { width: 4px; height: 4px; border-radius: 50%; background: var(--sub); display: inline-block; }
+  .capsule b { font-weight: 400; transform: scale(1.4); }
+
+  .screens { flex: 1; position: relative; overflow: hidden; }
+  .screen {
+    position: absolute; inset: 0; overflow-y: auto;
+    padding: 14px 16px 32px; display: none; flex-direction: column;
+  }
+  .screen.active { display: flex; }
+  .homebar {
+    position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 5px; border-radius: 3px; background: rgba(61,58,56,.25);
+    pointer-events: none;
+  }
+
+  /* ===== 通用组件 ===== */
+  .card {
+    background: var(--card); border-radius: 12px; padding: 14px;
+    box-shadow: 0 3px 12px rgba(61,58,56,.06);
+  }
+  .pill {
+    display: inline-block; font-size: 13px; color: var(--coral2);
+    background: #fff; padding: 6px 13px; border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(61,58,56,.06); cursor: pointer;
+  }
+  .toast {
+    position: absolute; left: 50%; top: 45%; transform: translate(-50%,-50%) scale(.9);
+    background: rgba(0,0,0,.75); color: #fff; font-size: 14px;
+    padding: 12px 20px; border-radius: 10px; opacity: 0; pointer-events: none;
+    transition: all .25s; z-index: 99; max-width: 80%;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  .mask {
+    position: absolute; inset: 0; background: rgba(0,0,0,.4); z-index: 50;
+    display: none;
+  }
+  .mask.show { display: block; }
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: -100%; z-index: 51;
+    background: #F7F7F7; border-radius: 14px 14px 0 0;
+    transition: bottom .25s; overflow: hidden;
+  }
+  .sheet.show { bottom: 0; }
+  .sheet .item {
+    padding: 15px; text-align: center; font-size: 15px; cursor: pointer;
+    background: #fff; border-bottom: 1px solid rgba(61,58,56,.05);
+  }
+  .sheet .item.cancel { margin-top: 6px; color: var(--sub); }
+  .modal {
+    position: absolute; left: 50%; top: 45%; transform: translate(-50%,-50%) scale(.9);
+    width: 280px; background: #fff; border-radius: 14px; z-index: 52;
+    display: none; transition: transform .2s;
+  }
+  .modal.show { display: block; transform: translate(-50%,-50%) scale(1); }
+  .modal .m-title { padding: 18px 20px 4px; text-align: center; font-size: 16px; font-weight: 600; }
+  .modal .m-content { padding: 6px 20px 20px; text-align: center; font-size: 14px; color: #6B6660; line-height: 1.6; }
+  .modal .m-btns { display: flex; border-top: 1px solid rgba(61,58,56,.08); }
+  .modal .m-btn { flex: 1; padding: 14px 0; text-align: center; font-size: 15px; cursor: pointer; }
+  .modal .m-btn + .m-btn { border-left: 1px solid rgba(61,58,56,.08); color: var(--coral2); font-weight: 600; }
+
+  /* ===== 首屏 ===== */
+  #s-home .entry-row { display: flex; justify-content: flex-end; padding: 2px 4px 0; }
+  #s-home .hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .hero-emoji { font-size: 50px; margin-bottom: 14px; }
+  .hero-slogan { font-size: 23px; font-weight: 700; letter-spacing: 2px; }
+  .hero-sub { margin-top: 9px; color: var(--sub); font-size: 13px; }
+  #s-home .home-footer { display: flex; justify-content: center; padding-bottom: 26px; }
+  .record-btn {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--coral1), var(--coral2));
+    color: #fff; font-size: 21px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 22px rgba(255,110,122,.35); cursor: pointer;
+    user-select: none;
+  }
+
+  /* ===== 记录页 ===== */
+  .field { margin-bottom: 12px; }
+  .field input { width: 100%; border: 0; outline: 0; font-size: 17px; font-weight: 600; background: transparent; font-family: inherit; }
+  .field textarea {
+    width: 100%; min-height: 120px; border: 0; outline: 0; resize: none;
+    font-size: 14px; line-height: 1.6; background: transparent; font-family: inherit;
+  }
+  .field ::placeholder { color: #C9C1B9; }
+  .counter { margin-top: 6px; text-align: right; font-size: 11px; color: var(--muted); }
+  .label { margin: 14px 4px 8px; font-size: 12px; color: #8A8580; }
+  .grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .cell {
+    width: 100px; height: 100px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; font-size: 34px;
+  }
+  .cell.add {
+    background: #fff; color: #C9C1B9; font-size: 30px;
+    border: 1.5px dashed #D8D0C7; cursor: pointer;
+  }
+  .video-cell {
+    height: 120px; border-radius: 8px; display: flex; align-items: center;
+    justify-content: center; position: relative; font-size: 42px;
+  }
+  .v-duration {
+    position: absolute; right: 10px; bottom: 8px;
+    background: rgba(0,0,0,.45); color: #fff; font-size: 11px;
+    padding: 3px 8px; border-radius: 10px;
+  }
+  .video-add {
+    height: 70px; border-radius: 8px; background: #fff;
+    border: 1.5px dashed #D8D0C7; color: #8A8580;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; cursor: pointer;
+  }
+  .save-btn {
+    margin-top: 28px; height: 46px; border-radius: 23px;
+    background: linear-gradient(135deg, var(--coral1), var(--coral2));
+    color: #fff; font-size: 16px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+
+  /* ===== 宝藏库 ===== */
+  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .again {
+    padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 600;
+    background: linear-gradient(135deg, var(--coral1), var(--coral2));
+    color: #fff; cursor: pointer;
+  }
+  .more {
+    width: 36px; height: 36px; border-radius: 50%; background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: #8A8580; letter-spacing: 1px;
+    box-shadow: 0 2px 8px rgba(61,58,56,.06); cursor: pointer;
+  }
+  .record-card { margin-bottom: 12px; cursor: pointer; }
+  .r-time { font-size: 11px; color: var(--muted); }
+  .r-title { margin-top: 5px; font-size: 17px; font-weight: 600; }
+  .r-text {
+    margin-top: 6px; color: #6B6660; font-size: 13px; line-height: 1.6;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+  }
+  .r-media { margin-top: 10px; display: flex; gap: 7px; }
+  .thumb {
+    width: 86px; height: 86px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; position: relative;
+  }
+  .v-dur {
+    position: absolute; right: 5px; bottom: 4px;
+    background: rgba(0,0,0,.45); color: #fff; font-size: 10px;
+    padding: 2px 6px; border-radius: 8px;
+  }
+  .end { margin-top: 8px; text-align: center; color: var(--muted); font-size: 12px; }
+
+  /* ===== 详情页 ===== */
+  .d-toolbar { display: flex; justify-content: flex-end; margin-bottom: 4px; }
+  .d-title { font-size: 22px; font-weight: 700; }
+  .d-time { margin-top: 7px; font-size: 12px; color: var(--muted); }
+  .d-text { margin-top: 14px; line-height: 1.8; font-size: 14px; color: #4A4643; }
+  .d-media { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
+  .media-cell {
+    height: 160px; border-radius: 9px; display: flex; align-items: center;
+    justify-content: center; font-size: 48px; position: relative;
+  }
+  .v-play {
+    position: absolute; right: 12px; bottom: 10px;
+    background: rgba(0,0,0,.45); color: #fff; font-size: 12px;
+    padding: 4px 10px; border-radius: 12px;
+  }
+
+  /* ===== 回收站 ===== */
+  .tip { margin: 4px 4px 12px; font-size: 12px; color: #8A8580; }
+  .rc-item { margin-bottom: 12px; }
+  .i-title { font-size: 16px; font-weight: 600; }
+  .i-summary { margin-top: 5px; color: #6B6660; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .i-meta { margin-top: 8px; font-size: 11px; color: var(--muted); }
+  .remain { color: var(--coral2); }
+  .i-actions { margin-top: 12px; display: flex; gap: 10px; }
+  .a-restore {
+    flex: 1; height: 38px; line-height: 38px; text-align: center; border-radius: 19px;
+    background: linear-gradient(135deg, var(--coral1), var(--coral2));
+    color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .a-destroy {
+    flex: 1; height: 38px; line-height: 38px; text-align: center; border-radius: 19px;
+    background: #fff; color: #8A8580; font-size: 14px; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(61,58,56,.06);
+  }
+  .empty { margin-top: 60px; text-align: center; color: var(--muted); font-size: 13px; }
+
+  /* ===== 舞台底部 ===== */
+  .stage-foot { margin-top: 18px; display: flex; align-items: center; gap: 12px; }
+  .chip {
+    font-size: 12px; color: #8A8580; background: rgba(255,255,255,.7);
+    padding: 6px 14px; border-radius: 14px;
+  }
+  .reset {
+    font-size: 12px; color: var(--coral2); background: rgba(255,255,255,.7);
+    border: 1px solid rgba(255,110,122,.3); padding: 5px 14px; border-radius: 14px; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header class="stage-head">
+    <div class="logo">🌿 发现freshin</div>
+    <div class="sub">记录每一个美好 · 可点击交互原型（纯前端假数据）</div>
+  </header>
+
+  <div class="phone">
+    <div class="statusbar"><span id="clock">9:41</span><span class="sb-right">5G ▂▄▆ 🔋86</span></div>
+    <div class="navbar">
+      <div class="nav-back hidden" id="navBack" onclick="back()">‹</div>
+      <div class="nav-title" id="navTitle">发现freshin</div>
+      <div class="capsule"><i></i><i></i><i></i><b>×</b></div>
+    </div>
+
+    <div class="screens">
+      <!-- 首屏：最短路径第 1 步 -->
+      <div class="screen active" id="s-home">
+        <div class="entry-row"><span class="pill" onclick="go('treasure')">宝藏库 ›</span></div>
+        <div class="hero">
+          <div class="hero-emoji">🌿</div>
+          <div class="hero-slogan">记录每一个美好</div>
+          <div class="hero-sub">每次开心，都值得被留下来</div>
+        </div>
+        <div class="home-footer"><div class="record-btn" onclick="go('record')">记录</div></div>
+      </div>
+
+      <!-- 记录页：最短路径第 2 步 -->
+      <div class="screen" id="s-record">
+        <div class="card field"><input id="fTitle" placeholder="输入标题" maxlength="20"></div>
+        <div class="card field">
+          <textarea id="fText" placeholder="输入内容" maxlength="500" oninput="updateCount()"></textarea>
+          <div class="counter"><span id="fCount">0</span>/500 · 至少 10 字</div>
+        </div>
+        <div class="label">照片（最多 9 张）</div>
+        <div class="grid" id="photoGrid"></div>
+        <div class="label">视频（最多 1 个，≤1 分钟且 ≤200MB）</div>
+        <div id="videoBox"></div>
+        <div class="save-btn" onclick="saveRecord()">保存</div>
+      </div>
+
+      <!-- 宝藏库：最短路径第 3 步 -->
+      <div class="screen" id="s-treasure">
+        <div class="toolbar">
+          <div class="again" onclick="go('record')">＋ 再记一条</div>
+          <div class="more" onclick="treasureMore()">···</div>
+        </div>
+        <div id="treasureList"></div>
+        <div class="end">到底啦，你的宝藏真多 ✨</div>
+      </div>
+
+      <!-- 详情页：支撑页 -->
+      <div class="screen" id="s-detail">
+        <div class="d-toolbar"><div class="more" onclick="detailMore()">···</div></div>
+        <div id="detailBody"></div>
+      </div>
+
+      <!-- 回收站：支撑页 -->
+      <div class="screen" id="s-recycle">
+        <div class="tip">删除的宝贝会在这里躺 3 天，到期自动清理</div>
+        <div id="recycleList"></div>
+        <div class="empty" id="recycleEmpty" style="display:none">回收站是空的</div>
+      </div>
+    </div>
+
+    <div class="mask" id="mask" onclick="closePopups()"></div>
+    <div class="sheet" id="sheet"></div>
+    <div class="modal" id="modal"></div>
+    <div class="toast" id="toast"></div>
+    <div class="homebar"></div>
+  </div>
+
+  <div class="stage-foot">
+    <span class="chip" id="pathChip">首屏 · 最短路径第 1 步</span>
+    <button class="reset" onclick="resetDemo()">重置演示数据</button>
+  </div>
+</div>
+
+<script>
+// ===== 假数据（与小程序原型 utils/mock.js 一致）=====
+var POOL = [
+  { emoji: '🌸', bg: 'linear-gradient(135deg,#FFD3A5,#FD6585)' },
+  { emoji: '🌈', bg: 'linear-gradient(135deg,#A18CD1,#FBC2EB)' },
+  { emoji: '🍰', bg: 'linear-gradient(135deg,#FF9A8B,#FAD0C4)' },
+  { emoji: '🌿', bg: 'linear-gradient(135deg,#84FAB0,#8FD3F4)' },
+  { emoji: '🐶', bg: 'linear-gradient(135deg,#F6D365,#FDA085)' },
+  { emoji: '✨', bg: 'linear-gradient(135deg,#89F7FE,#66A6FF)' }
+]
+
+function initialData() {
+  return {
+    records: [
+      { id: 'r1', title: '楼下的晚霞', text: '下班路上抬头看到粉紫色的晚霞，整条街的人都停下来拍照。风很软，忽然觉得生活挺好的。', createdAt: '2026-10-27 18:42', timeLabel: '刚刚',
+        photos: [
+          { emoji: '🌇', bg: 'linear-gradient(135deg,#FF9A8B,#FF6A88)' },
+          { emoji: '🌆', bg: 'linear-gradient(135deg,#A18CD1,#FBC2EB)' },
+          { emoji: '🌬️', bg: 'linear-gradient(135deg,#89F7FE,#66A6FF)' }
+        ], video: null },
+      { id: 'r2', title: '第一次手冲成功', text: '按上次记的参数冲了一壶，居然比店里的还好喝！再记一遍防忘：15g 豆、92°C、粉水比 1:16、两分钟萃取。开心到转圈圈。', createdAt: '2026-10-26 09:15', timeLabel: '昨天',
+        photos: [
+          { emoji: '☕', bg: 'linear-gradient(135deg,#F6D365,#FDA085)' },
+          { emoji: '🫘', bg: 'linear-gradient(135deg,#FF9A8B,#FAD0C4)' }
+        ], video: { emoji: '🎬', bg: 'linear-gradient(135deg,#84FAB0,#8FD3F4)', duration: '0:48' } },
+      { id: 'r3', title: '小猫主动蹭我了', text: '小区里那只高冷的三花，今天竟然主动过来蹭我的裤腿，还打呼噜。蹲在原地陪它十分钟，腿麻了也值。', createdAt: '2026-10-24 21:03', timeLabel: '10月24日', photos: [], video: null },
+      { id: 'r4', title: '和爸妈视频通话', text: '妈妈学会了新表情包，全程给我发小猫跳舞。爸爸在旁边偷偷入镜被发现后又跑掉。笑到肚子疼，挂了电话还在笑。', createdAt: '2026-10-20 20:30', timeLabel: '10月20日',
+        photos: [
+          { emoji: '😺', bg: 'linear-gradient(135deg,#FFD3A5,#FD6585)' },
+          { emoji: '📞', bg: 'linear-gradient(135deg,#A1C4FD,#C2E9FB)' },
+          { emoji: '🏠', bg: 'linear-gradient(135deg,#FBC2EB,#A6C1EE)' }
+        ], video: null }
+    ],
+    deleted: [
+      { id: 'd1', title: '随手记的碎碎念', summary: '今天有点累，但是奶茶很好喝，三分糖刚刚好…', deletedAt: '2026-10-27 10:12 删除', remain: '剩 2 天 3 小时' },
+      { id: 'd2', title: '一条测试记录', summary: '删除试试回收站好不好用，看起来是好用的…', deletedAt: '2026-10-26 22:40 删除', remain: '剩 1 天 6 小时' }
+    ]
+  }
+}
+
+var state = initialData()
+var currentPhotos = POOL.slice(0, 3)
+var currentVideo = null
+var detailId = null
+var stack = ['home']
+
+var SCREENS = {
+  home:    { title: '发现freshin', chip: '首屏 · 最短路径第 1 步', back: false },
+  record:  { title: '记录',        chip: '记录页 · 最短路径第 2 步', back: true },
+  treasure:{ title: '宝藏库',      chip: '宝藏库 · 最短路径第 3 步', back: true },
+  detail:  { title: '详情',        chip: '详情页 · 支撑页（回看/删除）', back: true },
+  recycle: { title: '回收站',      chip: '回收站 · 支撑页（3 天保留）', back: true }
+}
+
+// ===== 导航 =====
+function go(name, replace) {
+  if (replace) { stack[stack.length - 1] = name } else { stack.push(name) }
+  showScreen(name)
+}
+function back() {
+  if (stack.length > 1) { stack.pop(); showScreen(stack[stack.length - 1]) }
+}
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(function (s) { s.classList.remove('active') })
+  document.getElementById('s-' + name).classList.add('active')
+  document.getElementById('navTitle').textContent = SCREENS[name].title
+  document.getElementById('pathChip').textContent = SCREENS[name].chip
+  document.getElementById('navBack').classList.toggle('hidden', !SCREENS[name].back)
+}
+
+// ===== 弹层 =====
+function toast(msg) {
+  var t = document.getElementById('toast')
+  t.textContent = msg; t.classList.add('show')
+  clearTimeout(t._timer)
+  t._timer = setTimeout(function () { t.classList.remove('show') }, 1500)
+}
+function actionSheet(items, cb) {
+  var sheet = document.getElementById('sheet'), mask = document.getElementById('mask')
+  var html = items.map(function (it, i) { return '<div class="item" data-i="' + i + '">' + it + '</div>' }).join('')
+  sheet.innerHTML = html + '<div class="item cancel" data-i="-1">取消</div>'
+  mask.classList.add('show'); sheet.classList.add('show')
+  sheet.onclick = function (e) {
+    var i = parseInt(e.target.getAttribute('data-i'), 10)
+    closePopups()
+    if (i >= 0 && cb) cb(i)
+  }
+}
+function confirmModal(title, content, confirmText, cb) {
+  var modal = document.getElementById('modal'), mask = document.getElementById('mask')
+  modal.innerHTML =
+    '<div class="m-title">' + title + '</div><div class="m-content">' + content + '</div>' +
+    '<div class="m-btns"><div class="m-btn" data-r="0">取消</div><div class="m-btn" data-r="1">' + confirmText + '</div></div>'
+  mask.classList.add('show'); modal.classList.add('show')
+  modal.onclick = function (e) {
+    var r = e.target.getAttribute('data-r')
+    closePopups()
+    if (r === '1' && cb) cb()
+  }
+}
+function closePopups() {
+  document.getElementById('mask').classList.remove('show')
+  document.getElementById('sheet').classList.remove('show')
+  document.getElementById('modal').classList.remove('show')
+}
+
+// ===== 记录页 =====
+function renderPhotoGrid() {
+  var html = currentPhotos.map(function (p) {
+    return '<div class="cell" style="background:' + p.bg + '">' + p.emoji + '</div>'
+  }).join('')
+  if (currentPhotos.length < 9) html += '<div class="cell add" onclick="addPhoto()">＋</div>'
+  document.getElementById('photoGrid').innerHTML = html
+}
+function addPhoto() {
+  actionSheet(['拍摄', '从相册选择'], function () {
+    if (currentPhotos.length >= 9) { toast('最多 9 张哦'); return }
+    currentPhotos.push(POOL[currentPhotos.length % POOL.length])
+    renderPhotoGrid()
+  })
+}
+function renderVideoBox() {
+  var box = document.getElementById('videoBox')
+  if (currentVideo) {
+    box.innerHTML = '<div class="video-cell" style="background:' + currentVideo.bg + '">' +
+      currentVideo.emoji + '<span class="v-duration">▶ ' + currentVideo.duration + '</span></div>'
+  } else {
+    box.innerHTML = '<div class="video-add" onclick="addVideo()">＋ 添加视频</div>'
+  }
+}
+function addVideo() {
+  currentVideo = { emoji: '🎬', bg: 'linear-gradient(135deg,#84FAB0,#8FD3F4)', duration: '0:45' }
+  renderVideoBox()
+}
+function updateCount() {
+  document.getElementById('fCount').textContent = document.getElementById('fText').value.length
+}
+function saveRecord() {
+  var title = document.getElementById('fTitle').value.trim()
+  var text = document.getElementById('fText').value
+  if (!title) { toast('起个标题吧'); return }
+  if (text.length < 10) { toast('再写一点点吧，至少 10 个字'); return }
+  var now = new Date()
+  var pad = function (n) { return (n < 10 ? '0' : '') + n }
+  state.records.unshift({
+    id: 'r' + now.getTime(), title: title, text: text,
+    createdAt: now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes()),
+    timeLabel: '刚刚', photos: currentPhotos.slice(), video: currentVideo
+  })
+  // 重置表单为初始演示态
+  document.getElementById('fTitle').value = ''
+  document.getElementById('fText').value = ''
+  updateCount()
+  currentPhotos = POOL.slice(0, 3)
+  currentVideo = null
+  renderPhotoGrid(); renderVideoBox()
+  toast('已存入宝藏库 ✨')
+  setTimeout(function () { renderTreasure(); go('treasure', true) }, 600)
+}
+
+// ===== 宝藏库 =====
+function renderTreasure() {
+  var html = state.records.map(function (r) {
+    var thumbs = (r.photos || []).slice(0, 3).map(function (p) {
+      return '<div class="thumb" style="background:' + p.bg + '">' + p.emoji + '</div>'
+    }).join('')
+    var vb = r.video ? '<div class="thumb" style="background:' + r.video.bg + '">' + r.video.emoji +
+      '<span class="v-dur">▶ ' + r.video.duration + '</span></div>' : ''
+    return '<div class="card record-card" onclick="openDetail(\'' + r.id + '\')">' +
+      '<div class="r-time">' + r.timeLabel + ' · ' + r.createdAt + '</div>' +
+      '<div class="r-title">' + esc(r.title) + '</div>' +
+      '<div class="r-text">' + esc(r.text) + '</div>' +
+      ((thumbs || vb) ? '<div class="r-media">' + thumbs + vb + '</div>' : '') +
+      '</div>'
+  }).join('')
+  document.getElementById('treasureList').innerHTML = html
+}
+function treasureMore() {
+  actionSheet(['回收站 (' + state.deleted.length + ')'], function () { go('recycle') })
+}
+
+// ===== 详情页 =====
+function openDetail(id) {
+  detailId = id
+  var r = state.records.find(function (x) { return x.id === id })
+  if (!r) { toast('记录不存在'); return }
+  var media = (r.photos || []).map(function (p) {
+    return '<div class="media-cell" style="background:' + p.bg + '">' + p.emoji + '</div>'
+  }).join('')
+  if (r.video) {
+    media += '<div class="media-cell" style="background:' + r.video.bg + '">' + r.video.emoji +
+      '<span class="v-play">▶ 播放 ' + r.video.duration + '</span></div>'
+  }
+  document.getElementById('detailBody').innerHTML =
+    '<div class="d-title">' + esc(r.title) + '</div><div class="d-time">' + r.createdAt + '</div>' +
+    '<div class="d-text">' + esc(r.text) + '</div><div class="d-media">' + media + '</div>'
+  go('detail')
+}
+function detailMore() {
+  actionSheet(['移入回收站'], function () {
+    confirmModal('删除确认', '删除后将进入回收站，保留 3 天，期间可随时恢复', '移入回收站', function () {
+      var i = state.records.findIndex(function (x) { return x.id === detailId })
+      if (i >= 0) {
+        var r = state.records.splice(i, 1)[0]
+        state.deleted.unshift({
+          id: r.id, title: r.title, summary: r.text.slice(0, 20) + '…',
+          deletedAt: '刚刚删除', remain: '剩 2 天 23 小时'
+        })
+      }
+      toast('已移入回收站')
+      renderTreasure(); renderRecycle()
+      back()
+    })
+  })
+}
+
+// ===== 回收站 =====
+function renderRecycle() {
+  var html = state.deleted.map(function (d) {
+    return '<div class="card rc-item">' +
+      '<div class="i-title">' + esc(d.title) + '</div>' +
+      '<div class="i-summary">' + esc(d.summary) + '</div>' +
+      '<div class="i-meta">' + d.deletedAt + ' · <span class="remain">' + d.remain + '</span>后永久删除</div>' +
+      '<div class="i-actions">' +
+      '<div class="a-restore" onclick="restore(\'' + d.id + '\')">恢复</div>' +
+      '<div class="a-destroy" onclick="destroy(\'' + d.id + '\')">彻底删除</div>' +
+      '</div></div>'
+  }).join('')
+  document.getElementById('recycleList').innerHTML = html
+  document.getElementById('recycleEmpty').style.display = state.deleted.length ? 'none' : 'block'
+}
+function restore(id) {
+  var i = state.deleted.findIndex(function (x) { return x.id === id })
+  if (i < 0) return
+  var d = state.deleted.splice(i, 1)[0]
+  // 恢复回宝藏库顶部（演示：媒体为空数组的记录恢复为纯文字）
+  state.records.unshift({
+    id: d.id, title: d.title, text: d.summary.replace(/…$/, ''),
+    createdAt: '2026-10-25 12:00', timeLabel: '10月25日', photos: [], video: null
+  })
+  toast('已恢复')
+  renderTreasure(); renderRecycle()
+}
+function destroy(id) {
+  confirmModal('彻底删除确认', '彻底删除后无法恢复，确定吗？', '彻底删除', function () {
+    state.deleted = state.deleted.filter(function (x) { return x.id !== id })
+    toast('已彻底删除')
+    renderRecycle()
+  })
+}
+
+// ===== 其他 =====
+function resetDemo() {
+  state = initialData()
+  renderTreasure(); renderRecycle()
+  stack = ['home']; showScreen('home')
+  toast('已重置演示数据')
+}
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+function tickClock() {
+  var n = new Date(), pad = function (x) { return (x < 10 ? '0' : '') + x }
+  document.getElementById('clock').textContent = pad(n.getHours()) + ':' + pad(n.getMinutes())
+}
+
+renderPhotoGrid(); renderVideoBox(); renderTreasure(); renderRecycle()
+tickClock(); setInterval(tickClock, 30000)
+</script>
+</body>
+</html>

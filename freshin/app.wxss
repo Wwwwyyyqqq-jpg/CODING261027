@@ -1,0 +1,27 @@
+/* 发现freshin 全局样式：奶油底色 + 珊瑚暖色 */
+page {
+  background: #FFF9F0;
+  color: #3D3A38;
+  font-size: 28rpx;
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 24rpx 32rpx 60rpx;
+  box-sizing: border-box;
+}
+
+.card {
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 28rpx;
+  box-shadow: 0 6rpx 24rpx rgba(61, 58, 56, 0.06);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #FF9A6B 0%, #FF6E7A 100%);
+  color: #FFFFFF;
+  border-radius: 40rpx;
+  text-align: center;
+}

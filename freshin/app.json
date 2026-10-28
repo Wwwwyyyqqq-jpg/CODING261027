@@ -1,0 +1,17 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/record/record",
+    "pages/treasure/treasure",
+    "pages/detail/detail",
+    "pages/recycle/recycle"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#FFF9F0",
+    "navigationBarTitleText": "发现freshin",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#FFF9F0"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}
